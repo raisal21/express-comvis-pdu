@@ -1,20 +1,39 @@
-// // src/routes/userRoutes.ts
-import express from 'express';
-// import { getUsers } from '../controllers/userController';
-import db from '../db/databases.js';
+import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.middleware.js';
+import { userController } from '../controllers/userController.js';
 
-const router = express.Router();
+const router = Router();
+// Define roles that can access user management
+const ADMIN_ROLES = ['superadmin', 'admin'];
 
-router.get('/users', 
-    authMiddleware.verifyToken,
-    async(req, res) => {
-    try {
-      const users = await db.any('SELECT * FROM users WHERE deleted_at IS NULL');
-      res.json(users);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
+router.get('/users',
+  authMiddleware.verifyToken,
+  authMiddleware.isSuperAdmin,
+  userController.getUsers
+);
+
+router.get('/users/:id',
+  authMiddleware.verifyToken,
+  authMiddleware.checkUserManagementAccess(ADMIN_ROLES),
+  userController.getUserById
+);
+
+router.delete('/users/:id/soft',
+  authMiddleware.verifyToken,
+  authMiddleware.checkUserManagementAccess(ADMIN_ROLES),
+  userController.softDeleteUser
+);
+
+router.delete('/users/:id',
+  authMiddleware.verifyToken,
+  authMiddleware.isSuperAdmin,
+  userController.hardDeleteUser
+);
+
+router.patch('/users/:id/restore',
+  authMiddleware.verifyToken,
+  authMiddleware.checkUserManagementAccess(ADMIN_ROLES),
+  userController.restoreUser
+);
 
 export default router;

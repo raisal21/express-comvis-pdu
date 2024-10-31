@@ -70,5 +70,29 @@ export const AuthController = {
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
+  },
+
+  async googleCallback(req, res) {
+    try {
+      // If authentication failed, user will not be set
+      if (!req.user) {
+        const errorMessage = req.authInfo?.message || 'Authentication failed';
+        return res.redirect(`${process.env.FRONTEND_URL}/login?error=${encodeURIComponent(errorMessage)}`);
+      }
+
+      const { user, token } = req.user;
+      
+      // Successful authentication
+      res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?token=${token}`);
+    } catch (error) {
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+    }
+  },
+
+  handleAuthError(err, req, res, next) {
+    res.status(401).json({
+      error: 'Authentication failed',
+      message: err.message
+    });
   }
 };

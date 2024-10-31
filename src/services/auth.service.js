@@ -1,6 +1,7 @@
 // src/services/auth.service.js
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import passport from 'passport';
 import { UserModel } from '../models/user.model.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';

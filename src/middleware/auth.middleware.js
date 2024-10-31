@@ -33,5 +33,25 @@ export const authMiddleware = {
       }
       next();
     };
+  },
+
+  checkUserManagementAccess(allowedRoles) {
+    return (req, res, next) => {
+      if (!req.user || !allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({ 
+          message: 'You do not have permission to access user management' 
+        });
+      }
+      next();
+    };
+  },
+
+  isSuperAdmin(req, res, next) {
+    if (!req.user || req.user.role !== 'superadmin') {
+      return res.status(403).json({ 
+        message: 'Only superadmin can perform this action' 
+      });
+    }
+    next();
   }
 };

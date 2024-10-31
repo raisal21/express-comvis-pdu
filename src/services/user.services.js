@@ -1,17 +1,26 @@
-// interface User {
-//   id: string;
-//   name: string;
-// }
+import { UserModel } from "../models/user.model.js";
 
-// const users: User[] = [];
+export const UserService = {
+  async getAllUsers(limit, offset) {
+    const users = await UserModel.getAllUsers(limit, offset);
+    const total = await UserModel.getTotalUsers();
 
-// // Service untuk menemukan user berdasarkan ID
-// export const findUserById = (id: string) => {
-//   return users.find((user) => user.id === id);
-// };
+    return {
+      total,
+      limit,
+      offset,
+      data: users,
+    };
+  },
 
-// // Service untuk menambah user
-// export const addUser = (userData: User) => {
-//   users.push(userData);
-//   return userData;
-// };
+  async deleteUser(userId, type = "soft") {
+    if (type === "hard") {
+      return await UserModel.hardDeleteUser(userId);
+    }
+    return await UserModel.softDeleteUser(userId);
+  },
+
+  async restoreUser(userId) {
+    return await UserModel.restoreUser(userId);
+  },
+};

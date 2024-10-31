@@ -2,8 +2,9 @@
 import express from 'express';
 import cors from 'cors';
 import { appConfig } from '../config/app.config.js'; // Mengambil konfigurasi
+import { OAuthService } from './services/oauth.service.mjs';
 import routes from './routes/index.routes.js'; // Mengimpor index routes
-// import userRoutes from './routes/user.routes';
+
 
 const app = express();
 
@@ -23,7 +24,6 @@ app.use((err, req, res, next) => {
     });
   });
 
-// Routing
-// app.use('/users', userRoutes); // Menggunakan user routes
+app.use(OAuthService.initialize());
 
 export default app; // Export aplikasi untuk digunakan di server.ts
