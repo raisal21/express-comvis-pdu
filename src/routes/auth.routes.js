@@ -1,17 +1,18 @@
 // src/routes/auth.routes.js
 import passport from 'passport';
 import { Router } from 'express';
-import { AuthController } from '../controllers/auth.controller.js';
+import { authController } from '../controllers/auth.controller.js';
+import { authMiddleware } from '../middleware/auth.middleware.js';
+
 
 const router = Router();
 
-router.post('/auth/login', AuthController.login);
-router.post('/auth/register', AuthController.register);
+router.post('/auth/login', authController.login);
+router.post('/auth/register', authController.register);
 router.get(
   "/auth/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    // Add failure handling
     failureRedirect: "/login",
     failureMessage: true,
   })
@@ -20,12 +21,19 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "/login",
+    failureRedirect: "/",
     failureMessage: true,
   }),
-  AuthController.googleCallback
+  authController.googleCallback
 );
+router.post("/auth/logout", authController.logout);
+router.get('/auth/verify', authMiddleware.verifyToken, (req, res) => {
+  res.json({
+    message: 'Token is valid',
+    user: req.user,
+  });
+});
 
-router.use(AuthController.handleAuthError);
+router.use(authController.handleAuthError);
 
 export default router;
