@@ -1,18 +1,26 @@
 // src/controllers/auth.controller.js
 import { AuthService } from '../services/auth.service.js';
 import { UserModel } from '../models/user.model.js';
+import { ACCESS_TOKEN_MAX_AGE } from '../../libs/constants.js';
 
-export const AuthController = {
+export const authController = {
   async login(req, res) {
     try {
       const { email, password } = req.body;
-      
+
       if (!email || !password) {
         return res.status(400).json({ message: 'Email and password are required' });
-      }
+      } 
 
       const result = await AuthService.login(email, password);
-      
+
+      res.cookie('accessToken', result.accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: ACCESS_TOKEN_MAX_AGE
+      })
+
       res.json({
         message: 'Login successful',
         user: {
@@ -21,12 +29,12 @@ export const AuthController = {
           full_name: result.user.full_name,
           role: result.user.role
         },
-        token: result.token
       });
     } catch (error) {
       res.status(401).json({ message: error.message });
     }
   },
+
 
   async register(req, res) {
     try {
@@ -55,8 +63,6 @@ export const AuthController = {
         category_id
       });
 
-      const token = AuthService.generateToken(user);
-
       res.status(201).json({
         message: 'Registration successful',
         user: {
@@ -64,8 +70,7 @@ export const AuthController = {
           email: user.email,
           full_name: user.full_name,
           role: user.role
-        },
-        token
+        }
       });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -80,12 +85,26 @@ export const AuthController = {
         return res.redirect(`${process.env.FRONTEND_URL}/login?error=${encodeURIComponent(errorMessage)}`);
       }
 
-      const { user, token } = req.user;
+      const { user, accessToken } = req.user;
       
       // Successful authentication
-      res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?token=${token}`);
+      res.redirect(`${process.env.FRONTEND_URL}/oauth-callback?token=${accessToken}}`);
     } catch (error) {
       res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+    }
+  },
+
+  async logout(req, res) {
+    try {
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict'
+      });
+  
+      res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+      res.status(500).json({ message: 'Logout failed' });
     }
   },
 

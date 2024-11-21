@@ -8,7 +8,7 @@ export const appConfig = {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-    optionsSuccessStatus: 204,
+    optionsSuccessStatus: 204
   },
   isDevelopment: process.env.NODE_ENV === 'development'
 };

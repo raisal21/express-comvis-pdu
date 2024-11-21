@@ -13,19 +13,17 @@ router.get('/users',
 );
 
 router.get('/users/:id',
-  authMiddleware.verifyToken,
+
   authMiddleware.checkUserManagementAccess(ADMIN_ROLES),
   userController.getUserById
 );
 
 router.delete('/users/:id/soft',
-  authMiddleware.verifyToken,
   authMiddleware.checkUserManagementAccess(ADMIN_ROLES),
   userController.softDeleteUser
 );
 
 router.delete('/users/:id',
-  authMiddleware.verifyToken,
   authMiddleware.isSuperAdmin,
   userController.hardDeleteUser
 );

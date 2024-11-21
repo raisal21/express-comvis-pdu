@@ -1,4 +1,5 @@
 import { Router } from "express";
+import db from "../db/databases.js";
 const router = Router();
 
 router.get("/health", async (req, res) => {

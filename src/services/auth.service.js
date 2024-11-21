@@ -1,7 +1,6 @@
 // src/services/auth.service.js
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import passport from 'passport';
 import { UserModel } from '../models/user.model.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -10,23 +9,22 @@ const SALT_ROUNDS = 10;
 export const AuthService = {
   async validatePassword(plainPassword, hashedPassword) {
     return bcrypt.compare(plainPassword, hashedPassword);
-    console.log(validatePassword(plainPassword, hashedPassword));
   },
 
   async hashPassword(password) {
     return bcrypt.hash(password, SALT_ROUNDS);
-    console.log('Hashed password', hashedPassword);
   },
 
-  generateToken(user) {
+  generateAccessToken(user) {
     const payload = {
       id: user.id,
       email: user.email,
       role: user.role
     };
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
   },
 
+  
   async login(email, password) {
     const user = await UserModel.findByEmail(email);
     if (!user) {
@@ -39,7 +37,8 @@ export const AuthService = {
     if (!isValid) {
       throw new Error('Invalid password');
     }
-    const token = this.generateToken(user);
-    return { user, token };
-  }
+    const accessToken = this.generateAccessToken(user);
+    
+    return { user, accessToken};
+  },
 };

@@ -2,26 +2,27 @@
 import express from 'express';
 import cors from 'cors';
 import { appConfig } from '../config/app.config.js'; // Mengambil konfigurasi
-import { OAuthService } from './services/oauth.service.mjs';
+import http from 'http';
+import Cookies from 'cookies';
+import Keygrip from 'keygrip';
+import { OAuthService } from './services/oauth.service.js';
 import routes from './routes/index.routes.js'; // Mengimpor index routes
-import { createServer as createViteServer } from 'vite';
-
 
 const app = express();
 
+const keys = new Keygrip([
+  process.env.COOKIE_KEY1 || 'fallback-key-1', 
+  process.env.COOKIE_KEY2 || 'fallback-key-2'
+]);
 // Middleware global
 app.use(cors(appConfig.corsOptions)); // Gunakan opsi CORS dari appConfig
-
-// Development-only middleware
-if (appConfig.isDevelopment) {
-  const vite = await createViteServer({
-    server: { middlewareMode: 'html' },
-  });
-  app.use(vite.middlewares);
-}
-
-app.use(express.json()); // Mengizinkan pengiriman data JSON
-app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  // Create cookies instance
+  req.cookies = new Cookies(req, res, { keys: keys });
+  next();
+});
+app.use(express.json({limit: '50mb'})); // Mengizinkan pengiriman data JSON
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(routes); // Menggunakan index routes
 app.use(OAuthService.initialize());
 

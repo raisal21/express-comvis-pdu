@@ -1,4 +1,3 @@
-// src/services/oauth.service.js
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { UserModel } from '../models/user.model.js';
@@ -7,7 +6,7 @@ import { AuthService } from './auth.service.js';
 export const OAuthService = {
   initialize() {
     passport.use(new GoogleStrategy({
-      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientID: process.env.GOOGLE_CLIENT_ID || '934188418394-9sf3vh5ehjdj1krgtefacpud7luqek0f.apps.googleusercontent.com',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
       scope: ['profile', 'email']
